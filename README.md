@@ -2,7 +2,7 @@
 
 Find every TLS certificate you run and whether it renews itself, before shorter certificate lifetimes turn hand-renewed certificates into outages.
 
-> Status: early development. Endpoint, AWS and Kubernetes scanning work.
+> Status: early release (v0.1). Endpoint, AWS and Kubernetes scanning work; feedback and issues are welcome.
 
 ## Why
 
@@ -23,7 +23,23 @@ Certificates that renew automatically (ACM-issued, cert-manager, other ACME clie
 ## Install
 
 ```sh
+# Homebrew (macOS, Linux)
+brew install armansheikhhosseini/tap/certlapse
+
+# Container image (linux/amd64, linux/arm64)
+docker run --rm ghcr.io/armansheikhhosseini/certlapse scan example.com
+
+# Go
 go install github.com/armansheikhhosseini/certlapse/cmd/certlapse@latest
+```
+
+Binaries for macOS, Linux and Windows are on the [releases page](https://github.com/armansheikhhosseini/certlapse/releases). Release builds are reproducible: building the same tag gives byte-identical archives, which `checksums.txt` lists.
+
+In a container, mount the credentials it should use, read-only:
+
+```sh
+docker run --rm -v ~/.kube:/home/nonroot/.kube:ro ghcr.io/armansheikhhosseini/certlapse scan --kubernetes
+docker run --rm -v ~/.aws:/home/nonroot/.aws:ro -e AWS_PROFILE=prod ghcr.io/armansheikhhosseini/certlapse scan --aws
 ```
 
 ## Usage
@@ -283,7 +299,7 @@ Listing secrets returns their private keys to the client, as with `kubectl get s
 - [x] Manual renewal workload under shorter lifetimes; Markdown reports
 - [x] Renewal pre-flight: CAA and ACM validation records that will make the next renewal fail
 - [x] Generated fixes: cert-manager Certificates, ACM requests, DNS records
-- [ ] Releases: Homebrew, binaries, container image
+- [x] Releases: Homebrew, binaries, container image
 - [ ] Watch mode: scan on a schedule, keep history, and alert (Slack, email, PagerDuty) when a renewal starts failing or a certificate gets close to expiry
 - [ ] Audit reports (HTML, PDF) as evidence for ISO 27001, SOC 2 and NIS2
 - [ ] Revocation checks (OCSP)
