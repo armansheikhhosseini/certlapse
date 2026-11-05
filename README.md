@@ -33,7 +33,7 @@ docker run --rm ghcr.io/armansheikhhosseini/certlapse scan example.com
 go install github.com/armansheikhhosseini/certlapse/cmd/certlapse@latest
 ```
 
-Binaries for macOS, Linux and Windows are on the [releases page](https://github.com/armansheikhhosseini/certlapse/releases). Release builds are reproducible: building the same tag gives byte-identical archives, which `checksums.txt` lists.
+Binaries for macOS, Linux and Windows are on the [releases page](https://github.com/armansheikhhosseini/certlapse/releases). Each release lists SHA-256 checksums of its archives, and the binaries are built reproducibly (`-trimpath`, no build timestamps).
 
 In a container, mount the credentials it should use, read-only:
 
