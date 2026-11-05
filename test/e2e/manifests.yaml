@@ -1,0 +1,84 @@
+# Objects for the end-to-end test. setup.sh applies them and adds the secrets that
+# have to be generated (manual-tls, stale-tls) and the orphan.
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: demo
+---
+apiVersion: cert-manager.io/v1
+kind: ClusterIssuer
+metadata:
+  name: selfsigned
+spec:
+  selfSigned: {}
+---
+# A CA issuer whose CA secret doesn't exist, so it never becomes Ready.
+apiVersion: cert-manager.io/v1
+kind: Issuer
+metadata:
+  name: missing-ca
+  namespace: demo
+spec:
+  ca:
+    secretName: does-not-exist
+---
+# Healthy: issued and renewed by cert-manager, served by an Ingress.
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: web
+  namespace: demo
+spec:
+  secretName: web-tls
+  dnsNames: [web.demo.example]
+  issuerRef: {kind: ClusterIssuer, name: selfsigned}
+---
+# Renewal broken: takes over the existing stale-tls secret, but its issuer isn't ready.
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: stale
+  namespace: demo
+spec:
+  secretName: stale-tls
+  dnsNames: [stale.demo.example]
+  issuerRef: {kind: Issuer, name: missing-ca}
+---
+# Never issued: no secret will ever exist.
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: broken
+  namespace: demo
+spec:
+  secretName: broken-tls
+  dnsNames: [broken.demo.example]
+  issuerRef: {kind: Issuer, name: missing-ca}
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: web
+  namespace: demo
+spec:
+  tls:
+    - hosts: [web.demo.example]
+      secretName: web-tls
+  rules:
+    - host: web.demo.example
+---
+apiVersion: gateway.networking.k8s.io/v1
+kind: Gateway
+metadata:
+  name: public
+  namespace: demo
+spec:
+  gatewayClassName: none
+  listeners:
+    - name: https
+      protocol: HTTPS
+      port: 443
+      tls:
+        certificateRefs:
+          - kind: Secret
+            name: manual-tls

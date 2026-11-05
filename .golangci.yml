@@ -1,0 +1,7 @@
+version: "2"
+
+linters:
+  exclusions:
+    presets:
+      # Unchecked errors from Close, Flush and fmt.Fprint* are deliberate.
+      - std-error-handling

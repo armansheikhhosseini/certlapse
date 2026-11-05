@@ -1,0 +1,14 @@
+# Build output
+/certlapse
+/dist/
+
+# Local editor and assistant settings
+.claude/
+.vscode/
+.idea/
+.DS_Store
+
+# Scan output and target lists that may name real systems
+*.report.json
+endpoints.local.txt
+/bin/
